@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+    <meta charset='utf-8' />
+    <meta http-equiv="X-UA-Compatible" content="chrome=1" />
+    <meta name="description" content="Picklist-manager : Manage picklists in any Salesforce Org from one place using OAuth 2.0 and Metadata API" />
+
+    <link rel="stylesheet" type="text/css" media="screen" href="stylesheets/stylesheet.css">
+
+    <title>Picklist-manager</title>
+  </head>
+
+  <body>
+
+    <!-- HEADER -->
+    <div id="header_wrap" class="outer">
+        <header class="inner">
+          <a id="forkme_banner" href="https://github.com/logontokartik/Picklist-Manager">View on GitHub</a>
+
+          <h1 id="project_title">Picklist-manager</h1>
+          <h2 id="project_tagline">Manage picklists in any Salesforce Org from one place using OAuth 2.0 and Metadata API</h2>
+
+            <section id="downloads">
+              <a class="zip_download_link" href="https://github.com/logontokartik/Picklist-Manager/zipball/master">Download this project as a .zip file</a>
+              <a class="tar_download_link" href="https://github.com/logontokartik/Picklist-Manager/tarball/master">Download this project as a tar.gz file</a>
+            </section>
+        </header>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <div id="main_content_wrap" class="outer">
+      <section id="main_content" class="inner">
+        <h1>
+<a name="picklist-manager" class="anchor" href="#picklist-manager"><span class="octicon octicon-link"></span></a>Picklist-Manager</h1>
+
+<p>Manage picklists in any Salesforce Org from one place using OAuth 2.0 and Metadata API</p>
+
+<h2>
+<a name="working-sites-url" class="anchor" href="#working-sites-url"><span class="octicon octicon-link"></span></a>Working Sites URL</h2>
+
+<p><a></a><a href="http://picklist-developer-edition.na15.force.com/">http://picklist-developer-edition.na15.force.com/</a></p>
+
+<p>The above is built using Force.com Sites</p>
+
+<h2>
+<a name="configurartion" class="anchor" href="#configurartion"><span class="octicon octicon-link"></span></a>Configurartion</h2>
+
+<p>OAuth Custom Settings need to be defined for your application to work with Authentication. Right now I am using only Org wide defaults.</p>
+
+<ul>
+<li>OAuthURL       =  <a href="https://login.salesforce.com/services/oauth2/authorize?response_type=code">https://login.salesforce.com/services/oauth2/authorize?response_type=code</a>
+</li>
+<li>Client ID      = "Your Client ID setup via Remote Access"</li>
+<li>Client Secrent = "Your Client Secret setup via Remote Access"</li>
+<li>Redirect URI   = "If you are using the Sites, redirect URI is the Sites Home Page"</li>
+<li>OAuthEndpoint  = <a href="https://login.salesforce.com/services/oauth2/token">https://login.salesforce.com/services/oauth2/token</a> </li>
+</ul><p>
+    * Need to write Apex Test Classes
+    * Make it work with Large number of Picklist Value Inserts / Deletes (Batch process?)</p>
+      </section>
+    </div>
+
+    <!-- FOOTER  -->
+    <div id="footer_wrap" class="outer">
+      <footer class="inner">
+        <p class="copyright">Picklist-manager maintained by <a href="https://github.com/logontokartik">logontokartik</a></p>
+        <p>Published with <a href="http://pages.github.com">GitHub Pages</a></p>
+      </footer>
+    </div>
+
+    
+
+  </body>
+</html>
