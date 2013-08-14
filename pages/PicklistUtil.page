@@ -1,0 +1,172 @@
+<apex:page controller="PicklistUtilCon" showHeader="false" sidebar="false" standardStyleSheets="false" doctype="html-5.0" action="{!OAuthAccess}">
+	    <head>      
+        	<script src="{!URLFOR($Resource.kvisw_jQueryUI, '/js/jquery-1.8.2.js')}"></script>
+            <script src="{!URLFOR($Resource.kvisw_jQueryUI, '/js/jquery-ui-1.9.0.custom.js')}"></script>
+            <script src="{!URLFOR($Resource.bootStrap, '/js/bootstrap.min.js')}"></script>
+            <apex:stylesheet value="{!URLFOR ($Resource.kvisw_jQueryUI, '/css/ui-lightness/jquery-ui-1.9.0.custom.css')}" /> 
+            <apex:stylesheet value="{!URLFOR ($Resource.bootStrap, '/css/bootstrap.min.css')}" />
+		    <apex:stylesheet value="{!URLFOR ($Resource.bootStrap, '/css/bootstrap-responsive.css')}" />
+		         <!-- Add this VF Component to include all JQUERY Libraries -->     
+        
+        <!--  Custom Scripting Starts here -->
+        <script>
+			
+			$j = $.noConflict();
+			
+			function openPopUp(){
+						
+				$j('#conModal').modal('show');
+						
+			}
+			
+			var counter;
+			var timerC; 
+			
+			function startInterval(){
+				console.log('in here ');
+				$j('#conModal').modal('hide');
+				timerC 	  = 20;
+				retrieveSuccess = '{!retrieveSuccess}';
+				if(retrieveSuccess == 'false'){
+					counter   = setInterval(retrieveResults,1000);	
+					document.getElementById('mainDiv').style.display = 'none';
+					$j('#resultModal').modal('show');
+					console.log('in heref ' + retrieveSuccess);
+				}else{
+					$j('#resultModal').modal('hide');
+					document.getElementById('mainDiv').style.display = 'block';
+					console.log('in hereg ' + retrieveSuccess);
+				}
+			
+			}
+			
+			function retrieveResults(){
+				
+				document.getElementById("timer").innerHTML='Retrieving results in ' + timerC + " secs";
+				timerC = timerC - 1;
+				
+				if(timerC <= 0){
+						clearInterval(counter);
+						retrieveResultsAF();
+						startInterval();	
+				}
+				
+			}
+						
+			
+			
+		</script>
+		</head>
+		<apex:form id="theform">
+		
+		<apex:actionFunction name="insertNewValuesAF" action="{!insertNewValues}" />
+		<apex:actionFunction name="retrieveResultsAF" action="{!checkStatus}" />
+		
+		<div class="container-fluid" id="mainDiv">
+			
+			<apex:outputPanel id="messagesPanel">
+			<apex:outputPanel rendered="{!messages != null && messages.size > 0}">
+			<div class="alert alert-block">
+				 <button type="button" class="close" data-dismiss="alert">&times;</button>
+				<apex:repeat value="{!messages}" var="e">
+					<p>{!e}</p>
+				</apex:repeat>
+			</div>
+			</apex:outputPanel>
+			</apex:outputPanel>
+			
+			<!-- Hero Unit Authenticate -->
+			
+			<div class="hero-unit">
+				 <h1>Picklist Manager <small>Salesforce</small></h1>
+				 <p>Use this app to manage picklist values in any Salesforce Org using OAuth 2.0</p>
+				 <apex:outputPanel rendered="{!NOT(isAuthenticated)}">
+				 	<apex:commandButton value="Authenticate" action="{!validateUserCredentials}" reRender="theform" styleclass="btn btn-primary btn-large"/>	
+				 </apex:outputPanel>
+			</div>
+			<apex:outputPanel id="selectionPanel">
+			<div class="row-fluid">		        
+		        
+		        <div class="span4">
+		          <h2>Select Object</h2>
+		          <apex:selectList value="{!selectedObject}" multiselect="false" size="1">
+	            			<apex:selectOptions value="{!allObjects}"/>
+	            			<apex:actionSupport event="onchange" action="{!getPicklistFields}" rerender="selectionPanel"/>
+	              </apex:selectList>
+		        </div>
+		        
+		        <div class="span4">
+		          <h2>Select Field</h2>
+		          <apex:selectList value="{!selectedField}" multiselect="false" size="1">
+	            			<apex:selectOptions value="{!pFields}"/>
+	            			<apex:actionSupport event="onchange" action="{!getPicklistEntries}" rerender="selectionPanel"/>
+	              </apex:selectList>
+		        </div>
+		       </div>
+		       
+		       <apex:outputPanel rendered="{!isFieldSelected}">
+		       <div class="row-fluid"> 
+		        <div class="span8">
+		          <h2>Available Picklist Values</h2>
+		          <table class="table table-bordered">
+						<thead>
+							<tr>
+							<th>
+								<p>Select</p>
+							</th>
+							<th>
+								<p>Picklist Value</p>
+							</th>
+							</tr>
+						</thead>
+						<tbody>
+						<apex:repeat value="{!picklistEntries}" var="p">
+							<tr>
+							<td>
+								<apex:inputCheckbox value="{!p.isSelected}"/>
+							</td>
+							<td>
+								<apex:outputText value="{!p.pickVal}"/>
+							</td>
+							</tr>
+						</apex:repeat>
+						</tbody>
+					</table>
+		        </div>
+		     </div>
+      		 <div> 
+      		   <a href="#conModal" role="button" class="btn btn-primary" onclick="openPopUp();">Insert Picklist Values</a>
+      		   <apex:commandButton value="Delete picklist values" onclick="startInterval();" action="{!issueDelete}" disabled="{!NOT(isAuthenticated)}" reRender="theForm" styleclass="btn btn-danger"/>
+             </div>  
+             </apex:outputPanel>
+              
+			</apex:outputPanel>
+			<!-- Modal -->
+			<div id="conModal" class="modal hide fade"> 
+				<div class="modal-header">
+				    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+				    <h3 id="myModalLabel">Insert Picklists Seperated by Semi-Colon</h3>
+			    </div>
+			  	<div class="modal-body">
+			   		<apex:inputTextarea styleclass="form-control" value="{!picklistValues}"/> 
+			  	</div>
+			  	<div class="modal-footer">
+			    	<button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
+			    	<apex:commandButton value="Insert" onclick="startInterval();" action="{!insertNewValues}" disabled="{!NOT(isAuthenticated)}" reRender="theForm" styleclass="btn btn-primary"/>
+			   </div>
+			</div>
+			   
+		</div> <!-- /container -->   
+		<div>
+			<div id="resultModal" class="modal hide fade"> 
+				<div class="modal-header">
+				    <h3>Results</h3>
+			    </div>
+			  	<div class="modal-body">
+			   		<div id="timer"></div>
+			  	</div>
+			</div>
+		</div>
+		
+    </apex:form>   
+</apex:page>
