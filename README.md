@@ -15,7 +15,8 @@ OAuth Custom Settings need to be defined for your application to work with Authe
 * Redirect URI   = "If you are using the Sites, redirect URI is the Sites Home Page"
 * OAuthEndpoint  = https://login.salesforce.com/services/oauth2/token 
 
-<TODO>
+<h2>TODO</h2>
 	* Need to write Apex Test Classes
 	* Make it work with Large number of Picklist Value Inserts / Deletes (Batch process?)
+	* The site is currently allowing to do only one operation at time either Insert or Delete. If you try to do Insert and then delete, the app sends delete instructions but its not getting back the Status of request.
 		
