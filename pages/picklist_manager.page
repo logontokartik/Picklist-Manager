@@ -1,0 +1,296 @@
+<apex:page controller="PicklistUtilCon" showHeader="false" sidebar="false" standardStyleSheets="false" doctype="html-5.0" action="{!OAuthAccess}">
+			<head>
+				<meta charset="utf-8"/>
+		    <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+		    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+		    <meta name="description" content=""/>
+		    <meta name="author" content=""/>
+
+		    <title>Picklist Manager</title>
+		    <!-- Bootstrap Core CSS - Uses Bootswatch Flatly Theme: http://bootswatch.com/flatly/ -->
+				<link rel="stylesheet" href="{!URLFOR ($Resource.pk_bootstrap, 'css/bootstrap.min.css')}"/>
+		    <!-- Custom CSS -->
+				<link rel="stylesheet" href="{!URLFOR ($Resource.pk_bootstrap, 'css/freelancer.css')}"/>
+		    <!-- Custom Fonts -->
+				<link rel="stylesheet" href="{!URLFOR ($Resource.pk_bootstrap, 'font-awesome/css/font-awesome.min.css')}"/>
+				<link rel="stylesheet" href="{!URLFOR ($Resource.sweetalert, 'sweet-alert.css')}"/>
+				<link rel="stylesheet" href="{!URLFOR ($Resource.bsSelect, 'bootstrap-select.min.css')}"/>
+		    <link href="//fonts.googleapis.com/css?family=Montserrat:400,700" rel="stylesheet" type="text/css"/>
+		    <link href="//fonts.googleapis.com/css?family=Lato:400,700,400italic,700italic" rel="stylesheet" type="text/css"/>
+
+		    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+		    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+		    <!--[if lt IE 9]>
+		        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+		        <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+		    <![endif]-->
+				<apex:stylesheet value="{!URLFOR ($Resource.kvisw_jQueryUI, '/css/ui-lightness/jquery-ui-1.9.0.custom.css')}" />
+
+				<script src="{!URLFOR($Resource.sweetalert, 'sweet-alert.min.js')}"></script>
+				<!-- jQuery -->
+				<script src="{!URLFOR($Resource.pk_bootstrap, 'js/jquery.js')}"></script>
+
+				<!-- Bootstrap Core JavaScript -->
+				<script src="{!URLFOR($Resource.bootStrap, '/js/bootstrap.min.js')}"></script>
+
+				<!-- Plugin JavaScript -->
+				<script src="//cdnjs.cloudflare.com/ajax/libs/jquery-easing/1.3/jquery.easing.min.js"></script>
+
+				<!-- Custom Theme JavaScript -->
+				<script src="{!URLFOR($Resource.pk_bootstrap, '/js/freelancer.js')}"></script>
+				<script src="{!URLFOR($Resource.bsSelect, 'bootstrap-select.min.js')}"></script>
+
+				<script>
+
+					$(document).ready(function(){
+							regHandlers();
+					});
+
+					function regHandlers() {
+
+						$('.selectpicker').selectpicker(); // Register handlers
+
+						$('#insertBtn').on("click",function(e){
+							e.preventDefault();
+							$('#conModal').modal('show');
+						});
+
+						$('#picklistBtn').on('click',function(e){
+							e.preventDefault();
+							insertNewValuesAF();
+							$('#conModal').modal('hide');
+							showWaiting();
+						});
+
+						$('#deleteBtn').on('click',function(e){
+							e.preventDefault();
+							//Check to see if any are selected.
+
+							var atLeastOneIsChecked = $('input[class="picklistSelect"]:checked').length > 0;
+
+							if (atLeastOneIsChecked) {
+								deletePicklistsAF();
+								showWaiting();
+							} else {
+									swal({
+										title: "Warning!!",
+										type: "warning",
+										text: "Please select at least one picklist value...",
+										timer:1500
+									});
+							}
+
+						});
+
+					}
+
+					function showWaiting() {
+						swal({
+              type: "success",
+              title: "Please wait!",
+              text: "Your action is processing...",
+              closeOnConfirm: false,
+            });
+					}
+
+					function hideWaiting() {
+						swal({
+							type: "success",
+							title: "Success!",
+							text: "Your action is successful !!",
+							timer: 1500
+						});
+						regHandlers(); // Register broken handlers
+					}
+
+			  </script>
+	<!--  Custom Scripting Ends here -->
+		</head>
+		<body id="page-top" class="index">
+			<!-- Navigation -->
+		<apex:form id="theform">
+			<div id="mainDiv">
+			<apex:outputPanel id="navPanel">
+			<nav class="navbar navbar-default navbar-fixed-top">
+	        <div class="container">
+	            <!-- Brand and toggle get grouped for better mobile display -->
+	            <div class="navbar-header page-scroll">
+	                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+	                    <span class="sr-only">Toggle navigation</span>
+	                    <span class="icon-bar"></span>
+	                    <span class="icon-bar"></span>
+	                    <span class="icon-bar"></span>
+	                </button>
+	                <a class="navbar-brand" href="#page-top">Picklist Manager</a>
+	            </div>
+
+	            <!-- Collect the nav links, forms, and other content for toggling -->
+	            <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+	                <ul class="nav navbar-nav navbar-right">
+	                    <li class="hidden">
+	                        <a href="#page-top"></a>
+	                    </li>
+												<li class="page-scroll">
+		                        <a href="#user">
+															<apex:outputText rendered="{!NOT(isAuthenticated)}" value="About"/>
+															<apex:outputText rendered="{!isAuthenticated}" value="{!loggedInUser.userFullName}"/>
+														</a>
+		                    </li>
+	                </ul>
+	            </div>
+	            <!-- /.navbar-collapse -->
+	        </div>
+	        <!-- /.container-fluid -->
+	    </nav>
+			</apex:outputPanel>
+
+			<apex:actionFunction name="refreshPageAF" rerender="theForm" />
+			<apex:actionFunction name="picklistEntriesAF" action="{!getPicklistEntries}" rerender="selectionPanel" status="waitingStatus"/>
+			<apex:actionFunction name="insertNewValuesAF" action="{!insertNewValues}" oncomplete="hideWaiting();" rerender="selectionPanel" status="waitingStatus"/>
+			<apex:actionFunction name="deletePicklistsAF" action="{!issueDelete}" oncomplete="hideWaiting();" rerender="selectionPanel" status="waitingStatus"/>
+
+			<!-- Header -->
+			<!-- Login Authenticate -->
+			<apex:outputPanel rendered="{!NOT(isAuthenticated)}">
+			<script>
+				swal({
+					title: "Authenticate",
+					text: "Login with Salesforce",
+					type: "warning",
+					confirmButtonColor: '#DD6B55',
+					timer:2000
+				});
+			</script>
+			<header>
+	        <div class="container">
+	            <div class="row">
+	                <div class="col-lg-12">
+											<!--
+												Use image
+												<img class="img-responsive" src="img/profile.png" alt="">
+											-->
+											<div class="intro-text">
+	                        <span class="name">Picklist Manager</span>
+	                        <hr class="star-light"/>
+	                        <span class="skills">Use this app to manage picklist values in any Salesforce Org using OAuth 2.0</span>
+													<hr/>
+													<apex:commandButton value="Login with Salesforce" action="{!validateUserCredentials}" reRender="theform,navPanel"
+													styleclass="btn btn-primary btn-lg"/>
+	                    </div>
+	                </div>
+	            </div>
+	        </div>
+	    </header>
+		</apex:outputPanel>
+		<!-- End Header -->
+
+		<!-- Picklist Selection Section -->
+		<br/>
+		<apex:outputPanel id="picklistPanel" rendered="{!isAuthenticated}">
+			<section id="picklists">
+				<div class="container">
+            <div class="row">
+                <div class="col-lg-12 text-center">
+                    <h2>Field Selection</h2>
+                    <hr class="star-primary"/>
+                </div>
+            </div>
+            <apex:outputPanel id="selectionPanel">
+							<div class="row control-group text-center">
+								<div class="form-group col-xs-4 col-xs-offset-2 floating-label-form-group controls">
+									<h4>Select Object</h4>
+									<apex:selectList value="{!selectedObject}" multiselect="false" size="1" styleclass="form-control selectpicker" html-data-style="btn-primary">
+												<apex:selectOptions value="{!allObjects}"/>
+												<apex:actionSupport event="onchange" action="{!getPicklistFields}" rerender="selectionPanel" status="waitingStatus" oncomplete="regHandlers();"/>
+									</apex:selectList>
+								</div>
+
+								<div class="form-group col-xs-4 floating-label-form-group controls">
+									<h4>Select Field</h4>
+									<apex:selectList value="{!selectedField}" multiselect="false" size="1" styleclass="form-control selectpicker">
+												<apex:selectOptions value="{!pFields}"/>
+												<apex:actionSupport event="onchange" action="{!getPicklistEntries}" rerender="selectionPanel" status="waitingStatus" oncomplete="regHandlers();"/>
+										</apex:selectList>
+								</div>
+							</div>
+							<div class="row control-group text-center">
+							<apex:outputPanel rendered="{!selectedObject != null && pFields.size <= 1}">
+								<i>No Picklist Type fields on object </i>
+							</apex:outputPanel>
+							</div>
+
+						<apex:outputPanel rendered="{!isFieldSelected}">
+							<div class="row">
+								<div class="col-lg-8 col-lg-offset-2">
+									<h4>Picklist Values</h4>
+									<table class="table table-bordered">
+										<thead>
+												<th><p>Select</p></th>
+												<th><p>Picklist Value</p></th>
+										</thead>
+										<tbody>
+											<apex:repeat value="{!picklistEntries}" var="p">
+												<tr>
+												<td>
+													<apex:inputCheckbox value="{!p.isSelected}" styleClass="picklistSelect"/>
+												</td>
+												<td>
+													<apex:outputText value="{!p.pickVal}"/>
+												</td>
+												</tr>
+											</apex:repeat>
+										</tbody>
+									</table>
+									<div class="pull-right">
+										<button id="insertBtn" role="button" class="btn btn-primary">Insert New Values</button>&nbsp;
+										<button id="deleteBtn" role="button" class="btn btn-danger">Delete Selected Values</button>&nbsp;
+			            </div>
+								</div>
+							</div>
+
+						</apex:outputPanel>
+					</apex:outputPanel>
+        	</div>
+			</section>
+		</apex:outputPanel>
+
+				<!-- Modal -->
+		<div class="modal fade" id="conModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+		  <div class="modal-dialog">
+		    <div class="modal-content">
+		      <div class="modal-header">
+		        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+		        <h4 class="modal-title" id="myModalLabel">Insert Picklists Seperated by Semi-Colon</h4>
+		      </div>
+					<div class="modal-body">
+						<apex:inputTextarea styleclass="form-control" value="{!picklistValues}"/>
+					</div>
+					<div class="modal-footer">
+						<button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>
+						<button class="btn btn-primary" id="picklistBtn" aria-hidden="true">Insert</button>
+					</div>
+		    </div>
+		  </div>
+		</div>
+	</div>
+	<!-- End Main Div-->
+
+	<div class="modal fade" id="resultModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+		<div class="modal-dialog">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h3>Results</h3>
+				</div>
+				<div class="modal-body">
+					<div id="timer"></div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<div id="transparent" style="display:none; position: absolute;top:0;left:0;width: 100%;height:100%;z-index:2;opacity:0.4;filter: alpha(opacity = 50)">
+	</div>
+
+	</apex:form>
+	</body>
+</apex:page>

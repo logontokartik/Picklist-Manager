@@ -1,5 +1,10 @@
 Picklist-Manager
 ================
+
+UPDATE
+------
+Updated to the latest version of Metadata API and enhanced the UI completely. No more asynchronous waiting when calling MetadataAPI, results are returned immediately.
+
 Manage picklists in any Salesforce Org from one place using OAuth 2.0 and Metadata API
 
 <h2>Working Sites URL</h2>
@@ -13,10 +18,8 @@ OAuth Custom Settings need to be defined for your application to work with Authe
 * Client ID 	 = "Your Client ID setup via Remote Access"
 * Client Secrent = "Your Client Secret setup via Remote Access"
 * Redirect URI   = "If you are using the Sites, redirect URI is the Sites Home Page"
-* OAuthEndpoint  = https://login.salesforce.com/services/oauth2/token 
+* OAuthEndpoint  = https://login.salesforce.com/services/oauth2/token
 
 <h2>TODO</h2>
 * Need to write Apex Test Classes
-* Make it work with Large number of Picklist Value Inserts / Deletes (Batch process?)
-* The site is currently allowing to do only one operation at time either Insert or Delete. If you try to do Insert and then delete, the app sends delete instructions but its not getting back the Status of request.
-		
+* Make it work with Large number of Picklist Value Inserts / Deletes (Batch process?)	
